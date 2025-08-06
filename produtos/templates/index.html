@@ -1,0 +1,160 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Estoque</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #eef1f5;
+        }
+
+        .dashboard-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .card-text {
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <h1 class="text-center mb-4">📦 Sistema de Estoque</h1>
+        <p class="text-center mb-5 text-muted">Escolha uma ação abaixo para continuar</p>
+
+        <div class="row justify-content-center">
+            <div class="col-md-8 mb-4">
+                <a href="/cadastrar/" class="text-decoration-none">
+                    <div class="card dashboard-card shadow-sm">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">➕ Cadastrar Produto</h5>
+                            <p class="card-text">Adicione novos produtos ao estoque.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-8 mb-4">
+                <div class="card dashboard-card shadow-sm">
+                    <div class="card-body text-center">
+                        <h5 class="card-title ">🔍 Consultar Produtos</h5>
+                        <p class="card-text">Veja a lista de produtos cadastrados. <br><small class="text-muted">(Em desenvolvimento)</small></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Editar Produto -->
+            <div class="col-md-8 mb-4">
+              <div class="card dashboard-card shadow-sm" style="cursor:pointer" data-bs-toggle="modal" data-bs-target="#modalBuscaProduto">
+                <div class="card-body text-center">
+                  <h5 class="card-title">✏️ Editar Produto</h5>
+                  <p class="card-text">Atualize os dados de um produto.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Modal -->
+            <div class="modal fade" id="modalBuscaProduto" tabindex="-1" aria-labelledby="modalBuscaProdutoLabel" aria-hidden="true">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="modalBuscaProdutoLabel">Buscar Produto para Editar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                  </div>
+                  <div class="modal-body">
+
+                    <input type="text" id="inputBusca" class="form-control mb-3" placeholder="Digite o nome do produto...">
+
+                    <ul id="listaProdutos" class="list-group">
+                      <!-- Resultados da busca aparecerão aqui -->
+                    </ul>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <script>
+              const inputBusca = document.getElementById('inputBusca');
+              const listaProdutos = document.getElementById('listaProdutos');
+
+              // Função para buscar produtos na API e filtrar por nome
+              async function buscarProdutos(nome) {
+                listaProdutos.innerHTML = '<li class="list-group-item">Buscando...</li>';
+                try {
+                  const response = await fetch('/api/produtos/');
+                  const produtos = await response.json();
+
+                  // Filtra produtos pelo nome (case insensitive)
+                  const filtrados = produtos.filter(p => p.nome.toLowerCase().includes(nome.toLowerCase()));
+
+                  if (filtrados.length === 0) {
+                    listaProdutos.innerHTML = '<li class="list-group-item">Nenhum produto encontrado.</li>';
+                    return;
+                  }
+
+                  // Limpa lista e adiciona resultados
+                  listaProdutos.innerHTML = '';
+                  filtrados.forEach(produto => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    li.textContent = produto.nome;
+
+                    // Botão para editar
+                    const btnEditar = document.createElement('button');
+                    btnEditar.className = 'btn btn-sm btn-primary';
+                    btnEditar.textContent = 'Editar';
+                    btnEditar.onclick = () => {
+                      // Redireciona para a página de edição com o id do produto
+                      window.location.href = `/editar-produto/${produto.id}/`;
+                    };
+
+                    li.appendChild(btnEditar);
+                    listaProdutos.appendChild(li);
+                  });
+
+                } catch (error) {
+                  listaProdutos.innerHTML = '<li class="list-group-item text-danger">Erro ao buscar produtos.</li>';
+                }
+              }
+
+              // Evento input para busca dinâmica
+              inputBusca.addEventListener('input', (e) => {
+                const valor = e.target.value.trim();
+                if (valor.length >= 2) {
+                  buscarProdutos(valor);
+                } else {
+                  listaProdutos.innerHTML = '';
+                }
+              });
+            </script>
+
+
+            <div class="col-md-8 mb-4">
+                <div class="card dashboard-card shadow-sm">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">🗑️ Excluir Produto</h5>
+                        <p class="card-text">Remova produtos do estoque. <br><small class="text-muted">(Em desenvolvimento)</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

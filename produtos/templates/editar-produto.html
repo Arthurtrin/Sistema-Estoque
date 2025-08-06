@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Editar Produto</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- JS Bootstrap (para os toasts funcionarem) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+  <div class="card shadow">
+    <div class="card-header bg-primary text-white">
+      <h4>Editar Produto</h4>
+    </div>
+    <div class="card-body">
+      <form id="edit-form">
+        <div class="mb-3">
+          <label for="nome" class="form-label">Nome do Produto</label>
+          <input type="text" class="form-control" id="nome" required>
+        </div>
+        <div class="mb-3">
+        <label for="descricao" class="form-label">Descrição</label>
+        <input type="text" class="form-control" name="descricao" id="descricao">
+      </div>
+        <div class="mb-3">
+          <label for="quantidade" class="form-label">Quantidade</label>
+          <input type="number" class="form-control" id="quantidade" required>
+        </div>
+        <div class="mb-3">
+        <label for="preco" class="form-label">Preço Unitário</label>
+        <input type="number" class="form-control" name="preco_unitario" id="preco_unitario" step="0.01" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="preco" class="form-label">Preço Total</label>
+        <input type="number" class="form-control" name="preco_total" id="preco_total" step="0.01" required>
+      </div>
+        <div class="mb-3">
+          <label for="prateleira" class="form-label">Prateleira</label>
+          <input type="text" class="form-control" id="prateleira" required>
+        </div>
+        <button type="submit" class="btn btn-success">Salvar Alterações</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+  <div id="toastAtualizacao" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        Produto atualizado com sucesso!
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+  const produtoId = "{{ produto_id }}";
+
+  // Buscar dados do produto
+  fetch(`/api/produtos/${produtoId}/`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('nome').value = data.nome;
+      document.getElementById('descricao').value = data.descricao;
+      document.getElementById('quantidade').value = data.quantidade;
+      document.getElementById('preco_unitario').value = data.preco_unitario;
+      document.getElementById('preco_total').value = data.preco_total;
+      document.getElementById('prateleira').value = data.prateleira;
+
+    })
+    .catch(() => alert('Erro ao carregar dados do produto'));
+
+  // Salvar alterações
+  document.getElementById('edit-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const produtoAtualizado = {
+      nome: document.getElementById('nome').value,
+      descricao: document.getElementById('descricao').value,
+      quantidade: Number(document.getElementById('quantidade').value),
+      preco_unitario: document.getElementById('preco_unitario').value,
+      preco_total: document.getElementById('preco_total').value,
+      prateleira: document.getElementById('prateleira').value,
+      
+      
+    };
+
+    fetch(`/api/produtos/${produtoId}/`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(produtoAtualizado)
+    })
+    .then(res => {
+    if (res.ok) {
+        // Mostra o Toast de sucesso
+        const toast = new bootstrap.Toast(document.getElementById('toastAtualizacao'));
+        toast.show();
+
+        // Redireciona após 2 segundos
+        setTimeout(() => {
+        window.location.href = "/";
+        }, 1000);
+    } else {
+        alert('Erro ao atualizar produto.');
+    }
+    })
+    .catch(() => alert('Erro na conexão com a API.'));
+  });
+</script>
+</body>
+</html>
