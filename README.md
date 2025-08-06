@@ -64,4 +64,12 @@ python manage.py runserver
 - Edite e exclua produtos diretamente pela interface.
 - As operações usam chamadas API via JavaScript para interação dinâmica.
 
-  
+## 📄 Licença
+
+Este projeto está licenciado sob a licença **MIT** — veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+## 📫 Contato
+
+Feito com ❤️ por Seu Nome  
+📧 seu.email@exemplo.com
+
