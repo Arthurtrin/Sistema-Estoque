@@ -70,6 +70,6 @@ Este projeto está licenciado sob a licença **MIT** — veja o arquivo [LICENSE
 
 ## 📫 Contato
 
-Feito com ❤️ por Seu Nome  
-📧 seu.email@exemplo.com
+Feito com Carinho po Arthur Trindade  
+📧 arthurtrindade.dev@gmail.com
 
