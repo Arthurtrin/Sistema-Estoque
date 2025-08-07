@@ -37,7 +37,7 @@
 
         <div class="row justify-content-center">
             <div class="col-md-8 mb-4">
-                <a href="/cadastrar/" class="text-decoration-none">
+                <a href="/cadastrar" class="text-decoration-none">
                     <div class="card dashboard-card shadow-sm">
                         <div class="card-body text-center">
                             <h5 class="card-title">➕ Cadastrar Produto</h5>
@@ -48,12 +48,14 @@
             </div>
 
             <div class="col-md-8 mb-4">
+              <a href="/consultar/produtos" class="text-decoration-none">
                 <div class="card dashboard-card shadow-sm">
                     <div class="card-body text-center">
                         <h5 class="card-title ">🔍 Consultar Produtos</h5>
-                        <p class="card-text">Veja a lista de produtos cadastrados. <br><small class="text-muted">(Em desenvolvimento)</small></p>
+                        <p class="card-text">Veja a lista de produtos cadastrados.</p>
                     </div>
                 </div>
+              </a>
             </div>
 
             <!-- Card Editar Produto -->
@@ -119,7 +121,7 @@
                     btnEditar.textContent = 'Editar';
                     btnEditar.onclick = () => {
                       // Redireciona para a página de edição com o id do produto
-                      window.location.href = `/editar-produto/${produto.id}/`;
+                      window.location.href = `/editar/produto/${produto.id}/`;
                     };
 
                     li.appendChild(btnEditar);
@@ -144,13 +146,114 @@
 
 
             <div class="col-md-8 mb-4">
-                <div class="card dashboard-card shadow-sm">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">🗑️ Excluir Produto</h5>
-                        <p class="card-text">Remova produtos do estoque. <br><small class="text-muted">(Em desenvolvimento)</small></p>
-                    </div>
+              <div class="card dashboard-card shadow-sm" style="cursor:pointer" data-bs-toggle="modal" data-bs-target="#modalExcluirProduto">
+                <div class="card-body text-center">
+                  <h5 class="card-title">🗑️ Excluir Produto</h5>
+                  <p class="card-text">Remova produtos do estoque.</p>
                 </div>
+              </div>
             </div>
+
+            <!-- Modal de Exclusão -->
+            <div class="modal fade" id="modalExcluirProduto" tabindex="-1" aria-labelledby="modalExcluirProdutoLabel" aria-hidden="true">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                  <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="modalExcluirProdutoLabel">Excluir Produto</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                  </div>
+                  <div class="modal-body">
+                    <input type="text" id="inputBuscaExcluir" class="form-control mb-3" placeholder="Digite o nome do produto...">
+                    <ul id="listaProdutosExcluir" class="list-group">
+                      <!-- Resultados da busca para exclusão -->
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <script>
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
+</script>
+            
+            <script>
+              const inputBuscaExcluir = document.getElementById('inputBuscaExcluir');
+              const listaProdutosExcluir = document.getElementById('listaProdutosExcluir');
+
+              async function buscarParaExcluir(nome) {
+                listaProdutosExcluir.innerHTML = '<li class="list-group-item">Buscando...</li>';
+                try {
+                  const response = await fetch('/api/produtos/');
+                  const produtos = await response.json();
+
+                  const filtrados = produtos.filter(p => p.nome.toLowerCase().includes(nome.toLowerCase()));
+
+                  if (filtrados.length === 0) {
+                    listaProdutosExcluir.innerHTML = '<li class="list-group-item">Nenhum produto encontrado.</li>';
+                    return;
+                  }
+
+                  listaProdutosExcluir.innerHTML = '';
+                  filtrados.forEach(produto => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    li.textContent = produto.nome;
+
+                    const btnExcluir = document.createElement('button');
+                    btnExcluir.className = 'btn btn-sm btn-danger';
+                    btnExcluir.textContent = 'Excluir';
+                    btnExcluir.onclick = async () => {
+                      if (confirm(`Tem certeza que deseja excluir o produto "${produto.nome}"?`)) {
+                        const res = await fetch(`/excluir-produto/${produto.id}/`, {
+                          method: 'DELETE',
+                          headers: {
+                            'X-CSRFToken': csrftoken,
+                            'Content-Type': 'application/json'
+                          }
+                        });
+                        if (res.status === 204) {
+                          alert('Produto excluído com sucesso!');
+                          li.remove();
+                        } else {
+                          alert('Erro ao excluir produto.');
+                        }
+                      }
+                    };
+
+                    li.appendChild(btnExcluir);
+                    listaProdutosExcluir.appendChild(li);
+                  });
+
+                } catch (error) {
+                  listaProdutosExcluir.innerHTML = '<li class="list-group-item text-danger">Erro ao buscar produtos.</li>';
+                }
+              }
+
+              inputBuscaExcluir.addEventListener('input', (e) => {
+                const valor = e.target.value.trim();
+                if (valor.length >= 2) {
+                  buscarParaExcluir(valor);
+                } else {
+                  listaProdutosExcluir.innerHTML = '';
+                }
+              });
+            </script>
+
+
         </div>
     </div>
 

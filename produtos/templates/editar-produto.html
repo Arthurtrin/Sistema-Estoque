@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>Editar Produto</title>
+  <meta name="csrf-token" content="{{ csrf_token }}">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- JS Bootstrap (para os toasts funcionarem) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
 </head>
 <body class="bg-light">
 
@@ -33,11 +34,7 @@
         <label for="preco" class="form-label">Preço Unitário</label>
         <input type="number" class="form-control" name="preco_unitario" id="preco_unitario" step="0.01" required>
       </div>
-
-      <div class="mb-3">
-        <label for="preco" class="form-label">Preço Total</label>
-        <input type="number" class="form-control" name="preco_total" id="preco_total" step="0.01" required>
-      </div>
+      
         <div class="mb-3">
           <label for="prateleira" class="form-label">Prateleira</label>
           <input type="text" class="form-control" id="prateleira" required>
@@ -61,10 +58,9 @@
   </div>
 </div>
 
-
-
 <script>
   const produtoId = "{{ produto_id }}";
+  const csrftoken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
   // Buscar dados do produto
   fetch(`/api/produtos/${produtoId}/`)
@@ -74,7 +70,6 @@
       document.getElementById('descricao').value = data.descricao;
       document.getElementById('quantidade').value = data.quantidade;
       document.getElementById('preco_unitario').value = data.preco_unitario;
-      document.getElementById('preco_total').value = data.preco_total;
       document.getElementById('prateleira').value = data.prateleira;
 
     })
@@ -89,17 +84,16 @@
       descricao: document.getElementById('descricao').value,
       quantidade: Number(document.getElementById('quantidade').value),
       preco_unitario: document.getElementById('preco_unitario').value,
-      preco_total: document.getElementById('preco_total').value,
       prateleira: document.getElementById('prateleira').value,
-      
       
     };
 
-    fetch(`/api/produtos/${produtoId}/`, {
+    fetch(`/api/editar-produto/${produtoId}/`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'X-CSRFToken': csrftoken
       },
       body: JSON.stringify(produtoAtualizado)
     })
